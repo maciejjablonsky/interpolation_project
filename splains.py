@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import typing as tp
+import typing as typ
 
 
 def cubic_splains(x_interpolated: np.ndarray, X_samples: np.ndarray, Y_samples: np.ndarray) -> tuple:
@@ -45,7 +44,7 @@ def cubic_splains(x_interpolated: np.ndarray, X_samples: np.ndarray, Y_samples: 
         coefficients = np.linalg.solve(A, b).reshape((-1, 4))
         return [np.poly1d(c[::-1]) for c in coefficients]
 
-    def compute_y(x_in_intervals: np.ndarray, X_samples: np.ndarray, polynomials: tp.List[np.poly]):
+    def compute_y(x_in_intervals: np.ndarray, X_samples: np.ndarray, polynomials: typ.List[np.poly]):
         y = []
         def interpolate(x, i): return polynomials[i](x-X_samples[i])
         for i, interval in enumerate(x_in_intervals):
