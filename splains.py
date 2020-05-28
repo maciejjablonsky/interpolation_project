@@ -5,12 +5,14 @@ import typing as tp
 
 
 def splains(x_interpolated, X_samples, Y_samples) -> tuple:
+    n = len(X_samples) - 1
+    def zeros(n): return np.zeros((4*n), dtype=np.float64)
+
     def fill_equall_offset_on_edges_equations(A: np.ndarray, b: np.ndarray, X: np.ndarray, Y: np.ndarray):
-        n = len(X) - 1
         for i, (x_left, y_left, x_right, y_right) in enumerate(zip(X, Y, X[1:], Y[1:])):
-            left_edge_equation = np.zeros((4*n), dtype=np.float64)
+            left_edge_equation = zeros(n)
             left_edge_equation[4*i:4*i + 4] = [1, 0, 0, 0]
-            right_edge_equation = np.zeros((4*n), dtype=np.float64)
+            right_edge_equation = zeros(n)
             right_edge_equation[4*i:4*i +
                                 4] = [(x_right - x_left)**i for i in range(4)]
             A = np.vstack((A, left_edge_equation, right_edge_equation))
@@ -18,14 +20,12 @@ def splains(x_interpolated, X_samples, Y_samples) -> tuple:
         return A, b
 
     def fill_equally_continuous_curve_equations(A: np.ndarray, b: np.ndarray, X: np.ndarray, Y: np.ndarray) -> tuple:
-        n = len(X) - 1
         for i, (x_left, y_left, x_right, y_right) in enumerate(zip(X[:-1], Y[:-1], X[1:-1], Y[1:-1])):
             dx = x_right - x_left
-            derivative_equality_equation = np.zeros((4*n), dtype=np.float64)
+            derivative_equality_equation = zeros(n)
             derivative_equality_equation[4*i:4*i +
                                          8] = [0, 1, 2*dx, 3*(dx**2), 0, -1, 0, 0]
-            second_derivative_equality_equation = np.zeros(
-                (4*n), dtype=np.float64)
+            second_derivative_equality_equation = zeros(n)
             second_derivative_equality_equation[4 *
                                                 i:4*i + 8] = [0, 0, 2, 6*dx, 0, 0, - 2, 0]
             A = np.vstack((A, derivative_equality_equation,
@@ -34,10 +34,9 @@ def splains(x_interpolated, X_samples, Y_samples) -> tuple:
         return A, b
 
     def fill_inflection_on_boundaries_equations(A: np.ndarray, b: np.ndarray, X: np.ndarray, Y: np.ndarray) -> tuple:
-        n = len(X) - 1
-        left_boundary = np.zeros((4*n), dtype=np.float64)
+        left_boundary = zeros(n)
         left_boundary[0:4] = [0, 0, X[1] - X[0], 0]
-        right_boundary = np.zeros((4*n), dtype=np.float64)
+        right_boundary = zeros(n)
         right_boundary[4*n - 4: 4*n] = [0, 0, 2, 6*(X[n] - X[n - 1])]
         A = np.vstack((A, left_boundary, right_boundary))
         b = np.vstack((b, 0, 0))
@@ -49,9 +48,9 @@ def splains(x_interpolated, X_samples, Y_samples) -> tuple:
 
     def compute_y(x_in_intervals: np.ndarray, X_samples: np.ndarray, polynomials: tp.List[np.poly]):
         y = []
-        interpolate = lambda x, i: polynomials[i](x-X_samples[i])
+        def interpolate(x, i): return polynomials[i](x-X_samples[i])
         for i, interval in enumerate(x_in_intervals):
-            y.extend(map(lambda x:interpolate(x, i), interval))
+            y.extend(map(lambda x: interpolate(x, i), interval))
         return y
 
     def reshape_into_intervals(x, X_samples):
