@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import typing as tp
 
 
-def splains(x_interpolated, X_samples, Y_samples) -> tuple:
+def cubic_splains(x_interpolated, X_samples, Y_samples) -> tuple:
     n = len(X_samples) - 1
     def zeros(n): return np.zeros((4*n), dtype=np.float64)
 
@@ -83,7 +83,7 @@ X = np.array(data['distance'][0::step])
 Y = np.array(data['height'][0::step])
 x = np.linspace(min(X), max(X), num=1000)
 
-x, y = splains(x, X, Y)
+x, y = cubic_splains(x, X, Y)
 plt.plot(x, y, color='red', label='Interpolated')
 plt.plot(X, Y, '.', color='green', label='Real data')
 plt.legend()
