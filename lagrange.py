@@ -12,7 +12,7 @@ def phi(x_samples: np.ndarray, i: int) -> np.float64:
     return nominator / denominator
 
 
-def lagrange(x_to_interpolate:np.ndarray, x_samples: np.ndarray, y_samples: np.ndarray) -> np.ndarray:
+def lagrange(x_to_interpolate: np.ndarray, x_samples: np.ndarray, y_samples: np.ndarray) -> np.ndarray:
     """Interpolates f(x_to_interpolate) using lagrange polynomial interpolation given f as set of [x_samples, y_samples] points"""
     phis = [phi(x_samples, i) for i in range(len(x_samples))]
     return np.array([sum([y * phis[i](x) for i, y in enumerate(y_samples)]) for x in x_to_interpolate])
