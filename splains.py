@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import typing as tp
 
 
-def cubic_splains(x_interpolated, X_samples, Y_samples) -> tuple:
+def cubic_splains(x_interpolated: np.ndarray, X_samples: np.ndarray, Y_samples: np.ndarray) -> tuple:
+    """Interpolates f(x_interpolated) values given f as [X_samples, Y_samples] points"""
     n = len(X_samples) - 1
     def zeros(n): return np.zeros((4*n), dtype=np.float64)
 
@@ -38,19 +39,17 @@ def cubic_splains(x_interpolated, X_samples, Y_samples) -> tuple:
         left_boundary[0:4] = [0, 0, X[1] - X[0], 0]
         right_boundary = zeros(n)
         right_boundary[4*n - 4: 4*n] = [0, 0, 2, 6*(X[n] - X[n - 1])]
-        A = np.vstack((A, left_boundary, right_boundary))
-        b = np.vstack((b, 0, 0))
-        return A, b
+        return np.vstack((A, left_boundary, right_boundary)), np.vstack((b, 0, 0))
 
     def compute_polynomials(A: np.ndarray, b: np.ndarray) -> list:
         coefficients = np.linalg.solve(A, b).reshape((-1, 4))
-        return list(map(lambda c: np.poly1d(c[::-1]), coefficients))
+        return [np.poly1d(c[::-1]) for c in coefficients]
 
     def compute_y(x_in_intervals: np.ndarray, X_samples: np.ndarray, polynomials: tp.List[np.poly]):
         y = []
         def interpolate(x, i): return polynomials[i](x-X_samples[i])
         for i, interval in enumerate(x_in_intervals):
-            y.extend(map(lambda x: interpolate(x, i), interval))
+            y.extend((interpolate(x, i) for x in interval))
         return y
 
     def reshape_into_intervals(x, X_samples):
@@ -74,17 +73,3 @@ def cubic_splains(x_interpolated, X_samples, Y_samples) -> tuple:
     intervals = reshape_into_intervals(x_interpolated, X_samples)
     y = compute_y(intervals, X_samples, polynomials)
     return x_interpolated, y
-
-
-data = pd.read_csv('data/MountEverest.csv')
-
-step = 10
-X = np.array(data['distance'][0::step])
-Y = np.array(data['height'][0::step])
-x = np.linspace(min(X), max(X), num=1000)
-
-x, y = cubic_splains(x, X, Y)
-plt.plot(x, y, color='red', label='Interpolated')
-plt.plot(X, Y, '.', color='green', label='Real data')
-plt.legend()
-plt.show()
