@@ -44,7 +44,7 @@ def splains(x_interpolated, X_samples, Y_samples) -> tuple:
 
     def compute_polynomials(A: np.ndarray, b: np.ndarray) -> list:
         coefficients = np.linalg.solve(A, b).reshape((-1, 4))
-        return [np.poly1d(c[::-1]) for c in coefficients]
+        return list(map(lambda c: np.poly1d(c[::-1]), coefficients))
 
     def compute_y(x_in_intervals: np.ndarray, X_samples: np.ndarray, polynomials: tp.List[np.poly]):
         y = []

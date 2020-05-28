@@ -1,35 +1,29 @@
-import numpy as np 
-import pandas as pd 
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from functools import reduce
+
+
+def phi(x_samples: np.ndarray, i: int) -> np.float64:
+    nominator = reduce(lambda a, b: a * b, [np.poly1d([1, -x_sample])
+                                            for k, x_sample in enumerate(x_samples) if i != k])
+    denominator = np.prod([x_samples[i] - x_sample for k,
+                           x_sample in enumerate(x_samples) if i != k])
+    return nominator / denominator
+
+
+def lagrange(x_to_interpolate, x_samples: np.ndarray, y_samples: np.ndarray) -> np.ndarray:
+    phis = list(map(lambda i: phi(x_samples, i),range(len(x_samples))))
+    return np.array(list(map(lambda x: np.sum([y * phis[i](x) for i, y in enumerate(y_samples)]), x_to_interpolate)))
+
 
 data = pd.read_csv('data/MountEverest.csv')
 X = np.array(data['distance'])
 Y = np.array(data['height'])
-
-def poly_product(polynomials) -> np.poly:
-    product = 1
-    for polynomial in polynomials:
-        product *= polynomial
-    return product
-
-def phi(x_samples:np.ndarray, i:int) -> np.float64:
-    nominator = poly_product([np.poly1d([1, -x_sample]) for k, x_sample in enumerate(x_samples) if i != k])
-    denominator = np.prod([x_samples[i] - x_sample for k, x_sample in enumerate(x_samples) if i != k])
-    return nominator / denominator
-
-def lagrange(x:np.ndarray, x_samples:np.ndarray, y_samples:np.ndarray) -> np.ndarray:
-    phis = [phi(x_samples, i) for i,_ in enumerate(x_samples)]
-    def evaluate(x:np.float64, phis:list, y_samples:np.ndarray) -> np.float64:
-        return np.sum([y * phis[i](x) for i, y in enumerate(y_samples)])
-    return np.array([evaluate(x_, phis, y_samples) for x_ in x])
-
+1
 x = np.linspace(0, max(X), 500)
-fig, ax = plt.subplots(dpi=200)
-freq = int(len(X)//200)
-ax.semilogy(X[0::freq], Y[0::freq], 'x', color='red')
-for nodes in range(3, 20):
-    freq = int(len(X)//nodes)
-    plt.figure(dpi=200)
-    l = lagrange(x, X[0::freq], Y[0::freq], )
-    ax.semilogy(x, l)
-fig.show()
+step = 70
+plt.plot(X[0::step], Y[0::step], 'x', color='red')
+l = lagrange(x, X[0::step], Y[0::step])
+plt.plot(x, l)
+plt.show()
