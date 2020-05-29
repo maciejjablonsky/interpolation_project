@@ -2,7 +2,7 @@ import numpy as np
 import typing as typ
 
 
-def cubic_splains(x_interpolated: np.ndarray, X_samples: np.ndarray, Y_samples: np.ndarray) -> tuple:
+def cubic_splines(x_interpolated: np.ndarray, X_samples: np.ndarray, Y_samples: np.ndarray) -> tuple:
     """Interpolates f(x_interpolated) values given f as [X_samples, Y_samples] points"""
     n = len(X_samples) - 1
     def zeros(n): return np.zeros((4*n), dtype=np.float64)

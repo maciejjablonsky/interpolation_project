@@ -1,18 +1,18 @@
 import numpy as np
 from lagrange import lagrange
-from splains import cubic_splains
+from splains import cubic_splines
 import matplotlib.pyplot as plt
 import pandas as pd
 
 def mse(expected, evaluated): return (np.square(expected - evaluated)).mean()
 
 plots_path = 'plots/'
-method_name = 'splains'
+method_name = 'splines'
 
 
 method = {
     'lagrange':lagrange,
-    'splains':cubic_splains
+    'splines':cubic_splines
 }
 
 files = ['chelm', 'MountEverest', 'SpacerniakGdansk', 'WielkiKanionKolorado', 'Redlujjj']
@@ -30,7 +30,7 @@ for filename in files:
         idx = np.round(np.linspace(0, len(data) - 1, nodes).astype(int))
         X = x_real[idx]
         Y = y_real[idx]
-        _, y_interpolated = method[method_name](x_real, X, Y)
+        _, y_interpolated = cubic_splines(x_real, X, Y)
         err.append(mse(y_real, y_interpolated))
     print('Plotting %s %s error' % (filename, method_name))
     fig = plt.figure()
@@ -39,5 +39,5 @@ for filename in files:
     plt.grid()
     plt.ylabel('Wartość błędu [m]')
     plt.xlabel('Ilość węzłów [n]')
-    fig.savefig(plots_path + 'error_' + method_name + ' ' + filename + '.png', dpi=200)
+    fig.savefig(plots_path + 'error_' + method_name + '_' + filename + '.png', dpi=200)
 plt.show()
